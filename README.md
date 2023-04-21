@@ -4,6 +4,10 @@ This is a command-line tool for finding EC2 instances in your AWS account.
 
 ## How to Use
 
+Download from the release tab, follow those instructions and start using it!
+
+* When aw2 is used without an argument, it will print every ec2 instance on your aws account.
+* When aw2 is used with an argument, it will filter for what you've supplied.
 
 ## How It Works
 

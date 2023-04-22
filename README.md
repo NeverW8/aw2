@@ -20,4 +20,4 @@ Feel free to submit a pr
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](https://github.com/example/ec2-instance-finder/blob/main/LICENSE) file for details.
+This project is licensed under the MIT License. See the [LICENSE](https://github.com/NeverW8/aw2/blob/main/LICENSE) file for details.

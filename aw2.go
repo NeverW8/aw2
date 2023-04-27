@@ -3,6 +3,7 @@ package main
 import (
     "fmt"
     "os"
+    "regexp"
 
     "github.com/aws/aws-sdk-go/aws"
     "github.com/aws/aws-sdk-go/aws/session"
@@ -18,8 +19,14 @@ func main() {
     filters := []*ec2.Filter{}
     if len(os.Args) > 1 {
         filterText := os.Args[1]
+        filterKey := "tag:Name"
+        useIpFilter, _ := regexp.MatchString(`^(((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){1,4})`, filterText)
+        if useIpFilter {
+            filterKey = "private-ip-address"
+        }
+
         filter := &ec2.Filter{
-            Name: aws.String("tag:Name"),
+            Name: aws.String(filterKey),
             Values: []*string{
                 aws.String("*" + filterText + "*"),
             },

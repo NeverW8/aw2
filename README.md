@@ -1,5 +1,7 @@
 # Aw2
 
+![example workflow](https://github.com/NeverW8/aw2/actions/workflows/go.yml/badge.svg)
+
 This is a command-line tool for finding EC2 instances in your AWS account.
 
 ## How to Use

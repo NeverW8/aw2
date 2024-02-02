@@ -14,7 +14,6 @@ import (
 
 func main() {
 	sess := session.Must(session.NewSession())
-
 	svc := ec2.New(sess)
 
 	filters := []*ec2.Filter{}
@@ -65,18 +64,31 @@ func main() {
 		}
 	}
 
-    var style = lipgloss.NewStyle().
-        Bold(true).
-        Foreground(lipgloss.Color("#FF8800")).
-        Background(lipgloss.Color("#000000")).
-        Padding(0, 1)
-
-    fmt.Println(style.Render("EC2 Instances"))
+	style := lipgloss.NewStyle().
+		Bold(true).
+		Foreground(lipgloss.Color("#FF8800")).
+		Background(lipgloss.Color("#000000")).
+		Padding(0, 1)
 
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Public IP", "Private IP", "Name", "Type", "Status", "VpcId"})
+	table.SetHeader([]string{
+		style.Render("Public IP"),
+		style.Render("Private IP"),
+		style.Render("Name"),
+		style.Render("Type"),
+		style.Render("Status"),
+		style.Render("VpcId"),
+	})
+
 	for _, instance := range instances {
-		row := []string{instance.PublicIP, instance.PrivateIP, instance.Name, instance.Type, instance.Status, instance.VpcId}
+		row := []string{
+			style.Render(instance.PublicIP),
+			style.Render(instance.PrivateIP),
+			style.Render(instance.Name),
+			style.Render(instance.Type),
+			style.Render(instance.Status),
+			style.Render(instance.VpcId),
+		}
 		table.Append(row)
 	}
 	table.Render()

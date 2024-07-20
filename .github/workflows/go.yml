@@ -54,7 +54,7 @@ jobs:
         id: extract_notes
         run: |
           TAG=${{ steps.get_tag.outputs.TAG }}
-          awk "/## \[${TAG}\]/,/## \[/" CHANGELOG.md | sed '$d' | tee RELEASE_NOTES.md
+          awk "/## \[${TAG}\]/,/## \[/" CHANGELOG.md | sed '$d' > RELEASE_NOTES.md
         shell: bash
 
       - name: Create GitHub Release

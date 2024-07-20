@@ -6,10 +6,11 @@ on:
       - master
     types:
       - closed
+  workflow_dispatch:
 
 jobs:
   build:
-    if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
 
     strategy:

@@ -63,7 +63,7 @@ jobs:
 
       - name: Run Go modules vulnerability check
         run: |
-          go list -m all | nancy sleuth
+          go list -m all | ./nancy sleuth
 
   build:
     runs-on: ubuntu-latest

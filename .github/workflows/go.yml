@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    if: github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true)
     runs-on: ubuntu-latest
 
     strategy:
@@ -36,7 +36,7 @@ jobs:
         id: get_tag
         run: |
           TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
-          echo "::set-output name=TAG::$TAG"
+          echo "TAG=$TAG" >> $GITHUB_ENV
           echo "Latest tag: $TAG"
 
       - name: Set up Go
@@ -54,46 +54,22 @@ jobs:
       - name: Extract release notes
         id: extract_notes
         run: |
-          TAG=${{ steps.get_tag.outputs.TAG }}
+          TAG=${{ env.TAG }}
           awk "/## \[${TAG}\]/,/## \[/" CHANGELOG.md | sed '$d' > RELEASE_NOTES.md
         shell: bash
-
-      - name: Check if release exists
-        id: check_release
-        run: |
-          release_id=$(gh api repos/${{ github.repository }}/releases/tags/${{ steps.get_tag.outputs.TAG }} --jq '.id' 2>/dev/null || echo "null")
-          echo "::set-output name=release_id::$release_id"
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT }}
 
       - name: Create or Update GitHub Release
         id: create_or_update_release
         run: |
-          if [ "${{ steps.check_release.outputs.release_id }}" = "null" ]; then
-            gh api repos/${{ github.repository }}/releases \
-              -F tag_name=${{ steps.get_tag.outputs.TAG }} \
-              -F name=${{ steps.get_tag.outputs.TAG }} \
-              -F body="$(cat RELEASE_NOTES.md)" \
-              -F draft=false \
-              -F prerelease=false
+          TAG=${{ env.TAG }}
+          RELEASE_NOTES=$(cat RELEASE_NOTES.md)
+          EXISTING_RELEASE=$(gh release view $TAG --json url --jq '.url' || echo "null")
+          if [ "$EXISTING_RELEASE" = "null" ]; then
+            gh release create $TAG ${{ matrix.binary_name }} -t $TAG -n "$RELEASE_NOTES"
           else
-            gh api repos/${{ github.repository }}/releases/${{ steps.check_release.outputs.release_id }} \
-              -X PATCH \
-              -F body="$(cat RELEASE_NOTES.md)"
+            gh release edit $TAG -t $TAG -n "$RELEASE_NOTES"
+            gh release upload $TAG ${{ matrix.binary_name }} --clobber
           fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT }}
-
-      - name: Upload Release Assets
-        run: |
-          GH_ASSETS_URL=$(gh api repos/${{ github.repository }}/releases/tags/${{ steps.get_tag.outputs.TAG }} --jq '.upload_url' | sed 's/{.*}//')
-          echo "Uploading ${{ matrix.binary_name }} to $GH_ASSETS_URL"
-          curl \
-            -X POST \
-            -H "Authorization: token ${{ secrets.PAT }}" \
-            -H "Content-Type: application/octet-stream" \
-            --data-binary @${{ matrix.binary_name }} \
-            "$GH_ASSETS_URL?name=${{ matrix.binary_name }}"
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
 

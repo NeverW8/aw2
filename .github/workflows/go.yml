@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
 
     strategy:
@@ -30,7 +30,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # Ensure full history is fetched to access tags
 
       - name: Get the latest tag
         id: get_tag
@@ -70,13 +70,16 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
+      - name: Upload Release Assets
+        run: |
+          GH_ASSETS_URL=$(gh api repos/${{ github.repository }}/releases/tags/${{ steps.get_tag.outputs.TAG }} --jq '.upload_url' | sed 's/{.*}//')
+          echo "Uploading ${{ matrix.binary_name }} to $GH_ASSETS_URL"
+          curl \
+            -X POST \
+            -H "Authorization: token ${{ secrets.PAT }}" \
+            -H "Content-Type: application/octet-stream" \
+            --data-binary @${{ matrix.binary_name }} \
+            "$GH_ASSETS_URL?name=${{ matrix.binary_name }}"
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./${{ matrix.binary_name }}
-          asset_name: ${{ matrix.binary_name }}
-          asset_content_type: application/octet-stream
+          GH_TOKEN: ${{ secrets.PAT }}
 

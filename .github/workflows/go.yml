@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    if: github.event_name == 'workflow_dispatch'
+    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
 
     strategy:
@@ -30,7 +30,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Ensure full history is fetched to access tags
+          fetch-depth: 0
 
       - name: Get the latest tag
         id: get_tag
@@ -58,17 +58,24 @@ jobs:
           awk "/## \[${TAG}\]/,/## \[/" CHANGELOG.md | sed '$d' > RELEASE_NOTES.md
         shell: bash
 
-      - name: Create GitHub Release
-        id: create_release
-        uses: actions/create-release@v1
+      - name: Check if release exists
+        id: check_release
+        run: |
+          release_id=$(gh api repos/${{ github.repository }}/releases/tags/${{ steps.get_tag.outputs.TAG }} --jq '.id' || echo "null")
+          echo "::set-output name=release_id::$release_id"
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
-        with:
-          tag_name: ${{ steps.get_tag.outputs.TAG }}
-          release_name: ${{ steps.get_tag.outputs.TAG }}
-          body_path: RELEASE_NOTES.md
-          draft: false
-          prerelease: false
+
+      - name: Create or Update GitHub Release
+        id: create_or_update_release
+        run: |
+          if [ "${{ steps.check_release.outputs.release_id }}" = "null" ]; then
+            gh release create ${{ steps.get_tag.outputs.TAG }} --title ${{ steps.get_tag.outputs.TAG }} --notes-file RELEASE_NOTES.md
+          else
+            gh release update ${{ steps.check_release.outputs.release_id }} --notes-file RELEASE_NOTES.md
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
 
       - name: Upload Release Assets
         run: |

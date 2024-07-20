@@ -27,7 +27,6 @@ build_project() {
   go build -v -o bin/aw2 main.go
 }
 
-# Run the steps
 run_tests
 run_verification
 build_project

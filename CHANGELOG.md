@@ -1,4 +1,4 @@
-## [Released]
+## [Unreleased]
 - First build release
 
 ## [v1.0.2] - 2024-07-20

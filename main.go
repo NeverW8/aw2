@@ -11,7 +11,7 @@ import (
     "github.com/olekukonko/tablewriter"
 )
 
-const version = "v1.0.0"
+const version = "v1.0.2"
 
 func main() {
     if len(os.Args) > 1 && os.Args[1] == "--version" {

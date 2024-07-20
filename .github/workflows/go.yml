@@ -6,7 +6,7 @@ on:
       - master
     types:
       - closed
-  workflow_dispatch:
+  workflow_dispatch:  # Allows manual triggering from the UI
 
 jobs:
   build:
@@ -30,7 +30,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # Fetch all history so we can access tags
 
       - name: Get the latest tag
         id: get_tag
@@ -42,7 +42,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.22.2'
+          go-version: '1.17'
 
       - name: Build binary
         run: |
@@ -62,7 +62,7 @@ jobs:
         id: create_release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT }}
         with:
           tag_name: ${{ steps.get_tag.outputs.TAG }}
           release_name: ${{ steps.get_tag.outputs.TAG }}
@@ -73,7 +73,7 @@ jobs:
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./${{ matrix.binary_name }}

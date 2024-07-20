@@ -57,9 +57,8 @@ jobs:
 
       - name: Install Nancy
         run: |
-          curl -sSL https://github.com/sonatype-nexus-community/nancy/releases/latest/download/nancy-linux.amd64-v0.0.46 > nancy
+          wget -O nancy https://github.com/sonatype-nexus-community/nancy/releases/download/v1.0.46/nancy-v1.0.46-linux-amd64  
           chmod +x nancy
-          go list -m all | nancy sleuth
 
       - name: Run Go modules vulnerability check
         run: |

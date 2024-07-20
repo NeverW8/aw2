@@ -17,8 +17,12 @@ This tool uses the AWS SDK for Go to interact with the EC2 API. When you run the
 
 
 ## Contributers
-- @NeverW8
-- @Lapponiandevil
+<a href="https://github.com/neverw8/aw2/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=neverw8/aw2" />
+</a>
+
+- [NeverW8](https://github.com/neverw8)
+- [Lapponiandevil](https://github.com/Lapponiandevil)
 
 ## License
 

@@ -11,7 +11,13 @@ import (
     "github.com/olekukonko/tablewriter"
 )
 
+const version = "v1.0.0"
+
 func main() {
+    if len(os.Args) > 1 && os.Args[1] == "--version" {
+        fmt.Println("aw2 version:", version)
+        return
+    }
     sess := session.Must(session.NewSession())
 
     svc := ec2.New(sess)

@@ -45,7 +45,7 @@ jobs:
 
       - name: Build binary
         run: |
-          go build -o ${{ matrix.binary_name }} aw2.go
+          go build -o ${{ matrix.binary_name }} main.go
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}

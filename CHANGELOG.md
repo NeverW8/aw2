@@ -1,7 +1,7 @@
 ## [Released]
 - First build release
 
-## [v1.0.1] - 2024-07-20
+## [v1.0.2] - 2024-07-20
 ### Added
 - Version flag to aw2 binary (--version)
 

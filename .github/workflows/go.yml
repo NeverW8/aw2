@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
 
     strategy:
@@ -61,7 +61,7 @@ jobs:
       - name: Check if release exists
         id: check_release
         run: |
-          release_id=$(gh api repos/${{ github.repository }}/releases/tags/${{ steps.get_tag.outputs.TAG }} --jq '.id' || echo "null")
+          release_id=$(gh api repos/${{ github.repository }}/releases/tags/${{ steps.get_tag.outputs.TAG }} --jq '.id' 2>/dev/null || echo "null")
           echo "::set-output name=release_id::$release_id"
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
@@ -70,9 +70,16 @@ jobs:
         id: create_or_update_release
         run: |
           if [ "${{ steps.check_release.outputs.release_id }}" = "null" ]; then
-            gh release create ${{ steps.get_tag.outputs.TAG }} --title ${{ steps.get_tag.outputs.TAG }} --notes RELEASE_NOTES.md
+            gh api repos/${{ github.repository }}/releases \
+              -F tag_name=${{ steps.get_tag.outputs.TAG }} \
+              -F name=${{ steps.get_tag.outputs.TAG }} \
+              -F body="$(cat RELEASE_NOTES.md)" \
+              -F draft=false \
+              -F prerelease=false
           else
-            gh release update ${{ steps.check_release.outputs.release_id }} --notes RELEASE_NOTES.md
+            gh api repos/${{ github.repository }}/releases/${{ steps.check_release.outputs.release_id }} \
+              -X PATCH \
+              -F body="$(cat RELEASE_NOTES.md)"
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
@@ -88,5 +95,5 @@ jobs:
             --data-binary @${{ matrix.binary_name }} \
             "$GH_ASSETS_URL?name=${{ matrix.binary_name }}"
         env:
-          GH_TOKEN: ${{ secrets.PAT }}
+          GITHUB_TOKEN: ${{ secrets.PAT }}
 

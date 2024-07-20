@@ -36,9 +36,6 @@ bin/
 # Coverage files
 coverage.out
 
-# Go module files
-go.sum
-
 # Temporary files
 temp/
 tmp/
